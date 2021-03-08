@@ -20,17 +20,17 @@ import RtmEngine from 'agora-react-native-rtm';
 interface Props {}
 
 /**
- * @property appId Agora App ID
+ * @property appId Agora App ID as string
  * @property token Token for the channel
  * @property channelName Channel Name for the current session
- * @property inCall boolean to store if we're in an active video chat room
- * @properyy inLobby boolean to store if we're in the lobby
- * @properyy input string to store input channel name
- * @properyy joinedVideoRoom string storing the name of the joined channel
+ * @property inCall Boolean to store if we're in an active video chat room
+ * @property inLobby Boolean to store if we're in the lobby
+ * @property input String to store input
+ * @property joinedVideoRoom String storing the name of the joined channel
  * @property peerIds Array for storing connected peers during a video chat
  * @property seniors Array storing senior members in the joined channel
- * @properyy myUsername username to log in to RTM
- * @properyy rooms dictionary to store generated rooms and their member count
+ * @property myUsername Username to log in to RTM
+ * @property rooms Dictionary to store room names and their member count
  */
 interface State {
   appId: string;
@@ -239,23 +239,13 @@ export default class App extends Component<null, State> {
   };
 
   /**
-   * @name createChannel
-   * @description Function to create a room and join it
-   */
-  createChannel = async (channelName: string) => {
-    await this.joinCall(channelName);
-    await this._rtmEngine
-      ?.sendMessageByChannelId('lobby', channelName + ':' + 1)
-      .catch((e) => console.log(e));
-  };
-
-  /**
    * @name endCall
    * @description Function to end the call and return to lobby
    */
   endCall = async () => {
     let {channelName, myUsername, peerIds, seniors} = this.state;
     console.log('endcall', this.state);
+    // if we're the senior member, broadcast room to all users before leaving
     if (seniors.length < 2) {
       await this._rtmEngine
         ?.sendMessageByChannelId('lobby', channelName + ':' + peerIds.length)
@@ -326,7 +316,7 @@ export default class App extends Component<null, State> {
         />
         <TouchableOpacity
           onPress={async () => {
-            input ? await this.createChannel(input) : null;
+            input ? await this.joinCall(input) : null;
           }}
           style={styles.button}>
           <Text style={styles.buttonText}>Create Room</Text>
