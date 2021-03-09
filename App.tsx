@@ -26,7 +26,6 @@ interface Props {}
  * @property inCall Boolean to store if we're in an active video chat room
  * @property inLobby Boolean to store if we're in the lobby
  * @property input String to store input
- * @property joinedVideoRoom String storing the name of the joined channel
  * @property peerIds Array for storing connected peers during a video chat
  * @property seniors Array storing senior members in the joined channel
  * @property myUsername Username to log in to RTM
@@ -39,7 +38,6 @@ interface State {
   inCall: boolean;
   inLobby: boolean;
   input: string;
-  joinedVideoRoom: boolean;
   peerIds: number[];
   seniors: string[];
   myUsername: string;
@@ -59,7 +57,6 @@ export default class App extends Component<null, State> {
       inCall: false,
       input: '',
       inLobby: false,
-      joinedVideoRoom: false,
       peerIds: [],
       seniors: [],
       myUsername: '' + new Date().getTime(),
@@ -130,7 +127,7 @@ export default class App extends Component<null, State> {
       (channel, uid, elapsed) => {
         console.log('JoinChannelSuccess', channel, uid, elapsed);
         this.setState({
-          joinedVideoRoom: true,
+          inCall: true,
         });
       },
     );
@@ -149,7 +146,6 @@ export default class App extends Component<null, State> {
     });
 
     this._rtmEngine.on('channelMessageReceived', (evt) => {
-      console.log('channelMessageReceived', evt);
       // received message is of the form - channel:membercount, add it to the state
       let {text} = evt;
       let data = text.split(':');
@@ -157,7 +153,6 @@ export default class App extends Component<null, State> {
     });
 
     this._rtmEngine.on('messageReceived', (evt) => {
-      console.log('messageReceived', evt);
       // received message is of the form - channel:membercount, add it to the state
       let {text} = evt;
       let data = text.split(':');
@@ -167,7 +162,6 @@ export default class App extends Component<null, State> {
     this._rtmEngine.on('channelMemberJoined', (evt) => {
       let {channelName, seniors, peerIds, inCall} = this.state;
       let {channelId, uid} = evt;
-      console.log('channelMemberJoined', evt);
       // if we're in call and receive a lobby message and also we're the senior member (oldest member in the channel), signal channel status to joined peer
       if (inCall && channelId === 'lobby' && seniors.length < 2) {
         this._rtmEngine
@@ -181,7 +175,6 @@ export default class App extends Component<null, State> {
     });
 
     this._rtmEngine.on('channelMemberLeft', (evt) => {
-      console.log('channelMemberLeft', evt);
       let {channelId, uid} = evt;
       let {channelName, seniors, inCall, peerIds, rooms} = this.state;
       if (channelName === channelId) {
@@ -232,7 +225,6 @@ export default class App extends Component<null, State> {
         .catch((e) => console.log(e));
     }
     this.setState({
-      inCall: true,
       inLobby: false,
       seniors: members.map((m: any) => m.uid),
     });
@@ -244,7 +236,6 @@ export default class App extends Component<null, State> {
    */
   endCall = async () => {
     let {channelName, myUsername, peerIds, seniors} = this.state;
-    console.log('endcall', this.state);
     // if we're the senior member, broadcast room to all users before leaving
     if (seniors.length < 2) {
       await this._rtmEngine
@@ -267,7 +258,7 @@ export default class App extends Component<null, State> {
   };
 
   render() {
-    const {inCall, channelName} = this.state;
+    const {inCall, channelName, inLobby} = this.state;
     return (
       <SafeAreaView style={styles.max}>
         <View style={styles.spacer}>
@@ -277,6 +268,9 @@ export default class App extends Component<null, State> {
         </View>
         {this._renderRooms()}
         {this._renderCall()}
+        {!inLobby && !inCall ? (
+          <Text style={styles.waitText}>Please wait, joining room...</Text>
+        ) : null}
       </SafeAreaView>
     );
   }

@@ -25,6 +25,12 @@ export default StyleSheet.create({
     fontWeight: '700',
     marginBottom: 10,
   },
+  waitText: {
+    marginTop: 50,
+    fontSize: 16,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
   roleText: {
     textAlign: 'center',
     // fontWeight: '700',
