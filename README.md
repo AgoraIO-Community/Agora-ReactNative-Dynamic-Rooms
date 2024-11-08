@@ -1,4 +1,13 @@
-# Dynamic Video Chat Rooms
+# [ARCHIVED] Dynamic Video Chat Rooms
+
+**⚠️ This project is no longer maintained and has been archived.**  
+Please note that this repository is now in a read-only state and will not receive any further updates or support.
+
+We recommend using to the latest version of the **Agora React Native SDK**: [Learn more](https://www.agora.io/en/products/video-call/) 
+
+For documentation and support, please visit the [Agora Documentation](https://docs.agora.io/en/).
+
+---
 React Native using **Agora RTC** and **RTM** SDKs to create dynamic rooms. The RTC SDK is used to share live audio/video, RTM is used to signal the room status to all connected users.
 
 ## Prerequisites
